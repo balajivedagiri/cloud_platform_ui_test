@@ -1,0 +1,45 @@
+/* App.css */
+
+.container .logo-container {
+    display: flex;
+    align-items: flex-start; /* Align items to the top */
+  }
+  
+  .logo {
+    width: 200px; /* Adjust width as needed */
+    height: auto; /* Maintain aspect ratio */
+    margin-right: 10px;
+  }
+  
+ .company-name-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.company-name {
+  font-size: 24px; /* Adjust font size as needed */
+  margin-bottom: 5px; /* Add some space below the company name */
+}
+
+.services-section nav ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.services-section nav ul li {
+  display: inline-block;
+  margin-right: 20px;
+}
+
+.services-section nav ul li.services a {
+  text-decoration: none;
+  color: #333;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.services-section nav ul li.services a:hover {
+  color: #007bff;
+}

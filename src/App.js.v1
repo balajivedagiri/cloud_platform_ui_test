@@ -1,0 +1,38 @@
+// App.js
+
+import React from 'react';
+import { BrowserRouter as Router, Link, Route, Routes } from 'react-router-dom';
+import './App.css'; // Import CSS file for styling
+import Compute from './Compute';
+import CreateVMForm from './CreateVMForm';
+import companyLogo from './company-logo.png'; // Import your company logo image file
+
+function App() {
+  return (
+    <Router>
+      <div className="container">
+        <div className="logo-container">
+          <img className="logo" src={companyLogo} alt="Company Logo" />
+          <div>
+            <div className="company-name">e& Enterprise Cloud</div>
+            <div className="services-section">
+              <nav>
+                <ul>
+                  <li className="services">
+                    <Link to="/compute">Services</Link>
+                  </li>
+                </ul>
+              </nav>
+            </div>
+          </div>
+        </div>
+        <Routes>
+          <Route path="/compute" element={<Compute />} />
+          <Route path="/compute/vm/create" element={<CreateVMForm />} />
+        </Routes>
+      </div>
+    </Router>
+  );
+}
+
+export default App;

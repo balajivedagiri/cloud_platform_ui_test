@@ -1,0 +1,39 @@
+
+npm install axios
+npm install react-router-dom
+sudo npx create-react-app my-vm-frontend
+npm start
+
+To run the frontend application created with React, you'll need to follow these steps:
+
+    Install Node.js and npm: If you haven't already installed Node.js and npm (Node Package Manager), download and install them from the official website: Node.js Downloads.
+
+    Create a React App: If you haven't already set up a React project, you can create one using Create React App. Open a terminal and run the following command:
+
+    bash
+
+sudo npx create-react-app my-vm-frontend
+
+Navigate to the Project Directory: Move into the project directory using the following command:
+
+bash
+
+cd my-vm-frontend
+
+Replace the src Directory: Replace the contents of the src directory in your React project with the code provided for the frontend application. You can create a new file named CreateVMForm.js in the src directory and paste the code for the frontend component in it.
+
+Install Axios: If you haven't installed Axios yet, install it using npm:
+
+bash
+
+npm install axios
+
+Run the Application: After setting up the project and installing dependencies, you can start the development server by running:
+
+bash
+
+npm start
+
+View the Application: Once the development server is running, open a web browser and navigate to http://localhost:3000 to view your React application. You should see the form for creating VMs.
+
+Interact with the Form: You can now interact with the form by filling in the required fields and submitting the form. Make sure your backend server (Flask server hosting the create_vm API) is also running so that the frontend can make requests to it.
