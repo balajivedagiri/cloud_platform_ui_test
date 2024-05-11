@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './CreateSingleVMForm.css';
@@ -16,8 +14,8 @@ const CreateSingleVMForm = () => {
     cpuSockets: '',
     coresPerSocket: '',
     dataDisks: [],
-    networkPortGroups: [''], // Initialize with one empty value
-    vmCustomizationJson: '',
+    networkPortGroup: [],
+    vmCustomizationJson: '', // New state for storing VM customization JSON
   });
 
   const [dataDisks, setDataDisks] = useState([{ diskSizeGb: '', diskType: '' }]);
@@ -26,20 +24,24 @@ const CreateSingleVMForm = () => {
   const [clusters, setClusters] = useState([]);
   const [datastoreClusters, setDatastoreClusters] = useState([]);
   const [templates, setTemplates] = useState([]);
-  const [networkPortGroupsList, setNetworkPortGroupsList] = useState([]);
+  const [networkPortGroups, setNetworkPortGroups] = useState([]);
+  // const [networkPortGroup, setNetworkPortGroup] = useState([]);
+
 
   useEffect(() => {
     fetchDatacenters();
+    // fetchCustomerFolders(formData.datacenterName);
+    // fetchClusters(formData.datacenterName); // Fetch cluster names when component mounts
+    // fetchDatastoreClusters(formData.datacenterName); // Fetch datastore cluster names when component mounts
+    
   }, []);
 
   useEffect(() => {
     if (formData.datacenterName) {
-      fetchCustomerFolders(formData.datacenterName);
-      fetchClusters(formData.datacenterName);
-      fetchDatastoreClusters(formData.datacenterName);
       fetchTemplates(formData.datacenterName);
     }
   }, [formData.datacenterName]);
+
 
   useEffect(() => {
     if (formData.datacenterName && formData.clusterName) {
@@ -47,6 +49,7 @@ const CreateSingleVMForm = () => {
     }
   }, [formData.datacenterName, formData.clusterName]);
 
+  
   const fetchDatacenters = async () => {
     try {
       const response = await axios.get('http://127.0.0.1:5000/api/list_datacenters');
@@ -56,6 +59,7 @@ const CreateSingleVMForm = () => {
     }
   };
 
+  
   const fetchCustomerFolders = async (selectedDatacenter) => {
     try {
       const response = await fetch('http://127.0.0.1:5000/api/list_folders', {
@@ -121,22 +125,22 @@ const CreateSingleVMForm = () => {
         throw new Error('Failed to fetch network port groups');
       }
       const data = await response.json();
-      setNetworkPortGroupsList(data.networks);
+      setNetworkPortGroups(data.networks);
     } catch (error) {
       console.error('Error fetching network port groups:', error.message);
     }
   };
-
+  
+  
   const handleChange = (event) => {
     const { name, value } = event.target;
     setFormData({ ...formData, [name]: value });
 
     if (name === 'datacenterName') {
-      fetchCustomerFolders(value);
-      fetchClusters(value);
-      fetchDatastoreClusters(value);
-      fetchTemplates(value);
-    }
+        fetchCustomerFolders(value);
+        fetchClusters(value);
+        fetchDatastoreClusters(value); // Fetch datastore clusters when datacenter changes
+      }
   };
 
   const handleVmCustomizationChange = (event) => {
@@ -146,6 +150,11 @@ const CreateSingleVMForm = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+
+    // Ensure networkPortGroup is always an array
+    const networkPortGroup = Array.isArray(formData.networkPortGroup)
+      ? formData.networkPortGroup
+      : [formData.networkPortGroup];
 
     const payload = {
       vm_name: formData.vmName,
@@ -158,14 +167,16 @@ const CreateSingleVMForm = () => {
       cpu_sockets: formData.cpuSockets,
       cores_per_socket: formData.coresPerSocket,
       data_disks: formData.dataDisks,
-      network_cards: formData.networkPortGroups,
+      network_cards: networkPortGroup,
       vm_customization: JSON.parse(formData.vmCustomizationJson),
     };
     try {
       const response = await axios.post('http://127.0.0.1:5000/api/create_vm', payload);
       console.log('Response from API:', response.data);
+      // Optionally, handle success response
     } catch (error) {
       console.error('Error creating VM:', error.message);
+      // Optionally, handle error
     }
   };
 
@@ -184,23 +195,6 @@ const CreateSingleVMForm = () => {
     const newDataDisks = [...dataDisks];
     newDataDisks.splice(index, 1);
     setDataDisks(newDataDisks);
-  };
-
-  const handleAddNetworkPortGroup = () => {
-    setFormData({ ...formData, networkPortGroups: [...formData.networkPortGroups, ''] });
-  };
-
-  const handleRemoveNetworkPortGroup = (index) => {
-    const updatedNetworkPortGroups = [...formData.networkPortGroups];
-    updatedNetworkPortGroups.splice(index, 1);
-    setFormData({ ...formData, networkPortGroups: updatedNetworkPortGroups });
-  };
-
-  const handleNetworkPortGroupChange = (index, event) => {
-    const { value } = event.target;
-    const updatedNetworkPortGroups = [...formData.networkPortGroups];
-    updatedNetworkPortGroups[index] = value;
-    setFormData({ ...formData, networkPortGroups: updatedNetworkPortGroups });
   };
 
   return (
@@ -358,36 +352,26 @@ const CreateSingleVMForm = () => {
             required
           />
         </div>
-
         <div className="form-group">
-          <label htmlFor="networkPortGroup">Network Port Group:</label>
-          {formData.networkPortGroups.map((networkPortGroup, index) => (
-            <div key={index}>
-              <select
-                value={networkPortGroup}
-                onChange={(event) => handleNetworkPortGroupChange(index, event)}
+            <label htmlFor="networkPortGroup">Network Port Group:</label>
+            <select
+                id="networkPortGroup"
+                name="networkPortGroup"
+                value={formData.networkPortGroup || []} // Ensure formData.networkPortGroup is an array for multiple selections
+                onChange={handleChange}
                 className="form-input-small"
                 required
-              >
+                multiple={true} // Allow multiple selections
+            >
                 <option value="">Select Network Port Group</option>
-                {networkPortGroupsList.map((network, index) => (
-                  <option key={index} value={network}>
-                    {network}
-                  </option>
+                {networkPortGroups.map((network, index) => (
+                    <option key={index} value={network}>
+                        {network}
+                    </option>
                 ))}
-              </select>
-              {formData.networkPortGroups.length > 1 && (
-                <button type="button" onClick={() => handleRemoveNetworkPortGroup(index)}>
-                  Remove
-                </button>
-              )}
-            </div>
-          ))}
-          <button type="button" onClick={handleAddNetworkPortGroup}>
-            Add Network Port Group
-          </button>
+            </select>
+
         </div>
-        
 
 
         {/* VM Customization JSON */}
@@ -444,4 +428,4 @@ const CreateSingleVMForm = () => {
   );
 };
 
-export default CreateSingleVMForm;
+//           export default CreateSingleVMForm;
