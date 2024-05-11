@@ -8,6 +8,7 @@ import CreateVMForm from './CreateVMForm';
 import UpdateVMForm from './UpdateVMForm';
 import ListVMs from './ListVMs';
 import CreateCustomerFolder from './CreateCustomerFolder';
+import CreateSingleVMForm from './CreateSingleVMForm'; // Import CreateSingleVMForm component
 import companyLogo from './company-logo.png'; // Import your company logo image file
 
 function App() {
@@ -66,6 +67,7 @@ function App() {
             <Route path="update" element={<UpdateVMForm />} />
             <Route path="list" element={<ListVMs />} />
           </Route>
+          <Route path="/create-single-vm" element={<CreateSingleVMForm />} /> {/* Move this route outside Compute */}
           {/* Add routes for other services */}
         </Routes>
       </div>

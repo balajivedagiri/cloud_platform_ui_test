@@ -2,7 +2,29 @@ Steps:
 
 npm install axios
 npm install react-router-dom
+npm install react-router-dom
+
 sudo npx create-react-app my-vm-frontend
+
+npm start
+
+
+src % npm install react-router-dom
+
+up to date, audited 1564 packages in 3s
+
+262 packages are looking for funding
+  run `npm fund` for details
+
+8 vulnerabilities (2 moderate, 6 high)
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+
+
+
 npm start
 
 To run the frontend application created with React, you'll need to follow these steps:

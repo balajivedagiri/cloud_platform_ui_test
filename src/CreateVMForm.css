@@ -1,42 +1,24 @@
-body {
-    margin: 0;
-    padding: 0;
-    font-family: Arial, sans-serif;
-  }
-  
-  .container {
-    background-color: #f0f0f0;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
-  
-  header {
-    background-color: #333;
-    padding: 20px;
-  }
-  
-  header img {
-    max-width: 200px;
-  }
-  
-  .content {
-    padding: 20px;
-  }
-  
-  h2 {
-    margin-bottom: 20px;
-  }
-  
-  .form-field {
-    margin-bottom: 10px;
-  }
-  
-  .response {
-    margin-top: 20px;
-    padding: 10px;
-    background-color: #dff0d8;
-    border: 1px solid #3c763d;
-    color: #3c763d;
-  }
-  
+/* CreateVMForm.css */
+
+.create-vm-form {
+  padding: 20px;
+}
+
+.options-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.option {
+  margin-bottom: 10px;
+  padding: 10px;
+  background-color: #f0f0f0;
+  border-radius: 5px;
+  text-decoration: none;
+  color: #333;
+  transition: background-color 0.3s ease;
+}
+
+.option:hover {
+  background-color: #e0e0e0;
+}
