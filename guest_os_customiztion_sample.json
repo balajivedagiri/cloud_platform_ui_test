@@ -1,0 +1,18 @@
+{
+    "linux_options": {
+      "host_name": "rke2-cluster-test2-master011",
+      "domain": ""
+    },
+    "network_interfaces": [
+      {
+        "ipv4_address": "192.168.144.29",
+        "ipv4_netmask": "255.255.255.0",
+        "ipv4_gateway": "192.168.144.1",
+        "dns_server_list": ["8.8.8.8", "8.8.4.4"]
+      },
+      {
+        "ipv4_address": "10.40.255.105",
+        "ipv4_netmask": "255.255.0.0"
+      }
+    ]
+  }

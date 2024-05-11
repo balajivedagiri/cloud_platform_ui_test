@@ -15,12 +15,11 @@ const CreateSingleVMForm = () => {
     memoryMb: '',
     cpuSockets: '',
     coresPerSocket: '',
-    dataDisks: [],
-    networkPortGroups: [''], // Initialize with one empty value
+    dataDisks: [], // Removed dataDisks state
+    networkPortGroups: [''], 
     vmCustomizationJson: '',
   });
 
-  const [dataDisks, setDataDisks] = useState([{ diskSizeGb: '', diskType: '' }]);
   const [datacenters, setDatacenters] = useState([]);
   const [customerFolders, setCustomerFolders] = useState([]);
   const [clusters, setClusters] = useState([]);
@@ -157,7 +156,10 @@ const CreateSingleVMForm = () => {
       memory_mb: formData.memoryMb,
       cpu_sockets: formData.cpuSockets,
       cores_per_socket: formData.coresPerSocket,
-      data_disks: formData.dataDisks,
+      data_disks: formData.dataDisks.map(({ diskSizeGb, diskType }) => ({
+        disk_size_gb: diskSizeGb,
+        disk_type: diskType
+      })),
       network_cards: formData.networkPortGroups,
       vm_customization: JSON.parse(formData.vmCustomizationJson),
     };
@@ -171,19 +173,22 @@ const CreateSingleVMForm = () => {
 
   const handleDiskChange = (index, event) => {
     const { name, value } = event.target;
-    const newDataDisks = [...dataDisks];
-    newDataDisks[index][name] = value;
-    setDataDisks(newDataDisks);
+    const newDataDisks = [...formData.dataDisks];
+    
+    // Ensure "diskSizeGb" is stored as a number
+    newDataDisks[index][name] = name === 'diskSizeGb' ? parseFloat(value) : value;
+    
+    setFormData({ ...formData, dataDisks: newDataDisks });
   };
 
   const addDataDisk = () => {
-    setDataDisks([...dataDisks, { diskSizeGb: '', diskType: '' }]);
+    setFormData({ ...formData, dataDisks: [...formData.dataDisks, { diskSizeGb: '', diskType: '' }] });
   };
 
   const removeDataDisk = (index) => {
-    const newDataDisks = [...dataDisks];
+    const newDataDisks = [...formData.dataDisks];
     newDataDisks.splice(index, 1);
-    setDataDisks(newDataDisks);
+    setFormData({ ...formData, dataDisks: newDataDisks });
   };
 
   const handleAddNetworkPortGroup = () => {
@@ -387,7 +392,7 @@ const CreateSingleVMForm = () => {
             Add Network Port Group
           </button>
         </div>
-        
+
 
 
         {/* VM Customization JSON */}
@@ -403,7 +408,7 @@ const CreateSingleVMForm = () => {
           />
         </div>
         {/* Data Disks */}
-        {dataDisks.map((disk, index) => (
+        {formData.dataDisks.map((disk, index) => (
           <div key={index} className="data-disk">
             <h3>Data Disk {index + 1}</h3>
             <div className="form-group">
