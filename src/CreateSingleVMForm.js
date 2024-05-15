@@ -1,10 +1,13 @@
-
+// CreateSingleVMForm.js
 
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate for redirection
 import './CreateSingleVMForm.css';
 
+
 const CreateSingleVMForm = () => {
+  const navigate = useNavigate(); // Initialize useNavigate hook
   const [formData, setFormData] = useState({
     vmName: '',
     datacenterName: '',
@@ -26,6 +29,8 @@ const CreateSingleVMForm = () => {
   const [datastoreClusters, setDatastoreClusters] = useState([]);
   const [templates, setTemplates] = useState([]);
   const [networkPortGroupsList, setNetworkPortGroupsList] = useState([]);
+  const [loading, setLoading] = useState(false); // Initialize loading state
+
 
   useEffect(() => {
     fetchDatacenters();
@@ -143,8 +148,11 @@ const CreateSingleVMForm = () => {
     setFormData({ ...formData, vmCustomizationJson: value });
   };
 
-  const handleSubmit = async (event) => {
+   const handleSubmit = async (event) => {
+//  const handleSubmit = (event) => {
     event.preventDefault();
+    if (loading) return; // Prevent submission if already loading
+    setLoading(true); // Set loading state to true when form is submitted
 
     const payload = {
       vm_name: formData.vmName,
@@ -164,10 +172,16 @@ const CreateSingleVMForm = () => {
       vm_customization: JSON.parse(formData.vmCustomizationJson),
     };
     try {
+
       const response = await axios.post('http://127.0.0.1:5000/api/create_vm', payload);
       console.log('Response from API:', response.data);
+      setLoading(false); // Set loading state to false after successful creation
+      navigate('/success', { message: response.data }); // Redirect to success page with message
+
     } catch (error) {
-      console.error('Error creating VM:', error.message);
+      console.error('Error creating VM:', error);
+      setLoading(false); // Set loading state to false after failed creation
+      navigate('/error', { message: error }); // Redirect to error page with message
     }
   };
 
@@ -441,9 +455,14 @@ const CreateSingleVMForm = () => {
         <button type="button" onClick={addDataDisk} className="btn-add">
           Add Data Disk
         </button>
-        <button type="submit" className="btn-submit">
-          Create VM
-        </button>
+        <button
+        type="submit"
+        className="btn-submit"
+        disabled={loading} // Disable button when loading state is true
+        onClick={handleSubmit} // Call handleSubmit function when button is clicked
+      >
+        {loading ? 'Creating...' : 'Create VM'}
+      </button>
       </form>
     </div>
   );
