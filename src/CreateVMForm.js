@@ -3,7 +3,7 @@
 import React from 'react';
 import { Link, Routes, Route } from 'react-router-dom'; // Import Routes and Route components
 import CreateSingleVMForm from './CreateSingleVMForm'; // Import CreateSingleVMForm component
-// import CreateMultipleVMForm from './CreateMultipleVMForm'; // Import CreateMultipleVMForm component
+import CreateMultipleVMsForm from './CreateMultipleVMsForm'; // Import CreateMultipleVMForm component
 
 const CreateVMForm = () => {
   return (
@@ -13,14 +13,14 @@ const CreateVMForm = () => {
         <Link to="/create-single-vm" className="option">
           Create Single VM
         </Link>
-{/*         <Link to="/create-multiple-vms" className="option">
+        <Link to="/create-multiple-vms" className="option">
           Create Multiple VMs
-        </Link> */}
+        </Link>
       </div>
       {/* Include routes for CreateSingleVMForm and CreateMultipleVMForm */}
       <Routes>
         <Route path="/create-single-vm" element={<CreateSingleVMForm />} />
-        {/* <Route path="/create-multiple-vms" element={<CreateMultipleVMForm />} /> */}
+        <Route path="/create-multiple-vms" element={<CreateMultipleVMsForm />} />
       </Routes>
     </div>
   );

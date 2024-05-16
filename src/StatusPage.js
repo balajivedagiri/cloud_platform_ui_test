@@ -1,20 +1,24 @@
 import React from 'react';
-import { useApiResponse } from './ApiResponseContext';
+import { useLocation } from 'react-router-dom';
 
 const StatusPage = () => {
-  // Access the API response data using the useApiResponse hook
-  const { apiResponse } = useApiResponse();
+  const location = useLocation();
+  const responseData = location.state?.responseData;
 
   return (
     <div>
-      <h2>Status Page</h2>
-      {apiResponse ? (
+      {responseData ? (
         <div>
-          <h3>API Response:</h3>
-          <pre>{JSON.stringify(apiResponse, null, 2)}</pre>
+          <h1>VM Creation Successful</h1>
+          <h2>VM Details:</h2>
+          <p>VM Name: {responseData.vmName}</p>
+          {/* Display other VM details here */}
         </div>
       ) : (
-        <p>No API response available.</p>
+        <div>
+          <h1>VM Creation Status Page</h1>
+          <p>Waiting for VM creation...</p>
+        </div>
       )}
     </div>
   );

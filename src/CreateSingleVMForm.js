@@ -30,6 +30,21 @@ const CreateSingleVMForm = () => {
   const [templates, setTemplates] = useState([]);
   const [networkPortGroupsList, setNetworkPortGroupsList] = useState([]);
   const [loading, setLoading] = useState(false); // Initialize loading state
+  const [error, setError] = useState(null);
+  const [submitted, setSubmitted] = useState(false);
+  const [validationErrors, setValidationErrors] = useState({
+    vmName: false,
+    datacenterName: false,
+    customerFolder: false,
+    clusterName: false,
+    datastoreClusterName: false,
+    templateName: false,
+    memoryMb: false,
+    cpuSockets: false,
+    coresPerSocket: false,
+    networkPortGroups: false,
+  });
+
 
 
   useEffect(() => {
@@ -134,13 +149,14 @@ const CreateSingleVMForm = () => {
   const handleChange = (event) => {
     const { name, value } = event.target;
     setFormData({ ...formData, [name]: value });
-
-    if (name === 'datacenterName') {
-      fetchCustomerFolders(value);
-      fetchClusters(value);
-      fetchDatastoreClusters(value);
-      fetchTemplates(value);
-    }
+    setValidationErrors({ ...validationErrors, [name]: !value });
+    
+    // if (name === 'datacenterName') {
+    //   fetchCustomerFolders(value);
+    //   fetchClusters(value);
+    //   fetchDatastoreClusters(value);
+    //   fetchTemplates(value);
+    // }
   };
 
   const handleVmCustomizationChange = (event) => {
@@ -148,11 +164,39 @@ const CreateSingleVMForm = () => {
     setFormData({ ...formData, vmCustomizationJson: value });
   };
 
+  const validateNetworkConfig = () => {
+  
+    // Check if vmCustomizationJson is empty
+    if (!formData.vmCustomizationJson) {
+        return false;
+    }
+    // Check if network cards and network interfaces lengths are equal
+    const vmCustomization = JSON.parse(formData.vmCustomizationJson);
+    if (
+      formData.networkPortGroups.length !== vmCustomization.network_interfaces.length
+    ) {
+      return false;
+    }
+  
+    // Add more validation rules as needed
+    return true;
+  };
+  
    const handleSubmit = async (event) => {
 //  const handleSubmit = (event) => {
     event.preventDefault();
+    setSubmitted(true); // Set submitted to true when form is submitted
     if (loading) return; // Prevent submission if already loading
-    setLoading(true); // Set loading state to true when form is submitted
+
+    // Perform validation
+    if (!validateNetworkConfig()) {
+        setError('Number of nics selected and network_interfaces passed in customization json doesnt match');
+        return;
+      }
+  
+      setLoading(true); // Set loading state to true when form is submitted
+      setError(null);
+    
 
     const payload = {
       vm_name: formData.vmName,
@@ -171,18 +215,30 @@ const CreateSingleVMForm = () => {
       network_cards: formData.networkPortGroups,
       vm_customization: JSON.parse(formData.vmCustomizationJson),
     };
+
     try {
 
-      const response = await axios.post('http://127.0.0.1:5000/api/create_vm', payload);
-      console.log('Response from API:', response.data);
-      setLoading(false); // Set loading state to false after successful creation
-      navigate('/success', { message: response.data }); // Redirect to success page with message
+        const response = await axios.post('http://127.0.0.1:5000/api/create_vm', payload);
+        console.log('Response from API:', response.data);
+        console.log('Response from API:', response.data.result);
+        // Transform the response data as needed
+        // Transform the response data as needed
+        // const transformedData = {
+        //     // Example: Extracting only specific fields from response.data
+        //     result: response.data.result,
+        //     task_result: response.data.task_result
+        // };
+        setLoading(false); // Set loading state to false after successful creation
+        //navigate('/success', { message: response.data }); // Redirect to success page with message
+        navigate('/success', { state: { message: response.data.task_result, vm_name: formData.vmName } })
+  
+      } catch (error) {
+        console.error('Error creating VM:', error);
+        setLoading(false); // Set loading state to false after failed creation
+        setError('Failed to create VM. Please try again.');
+        navigate('/error', { message: error }); // Redirect to error page with message
+      }
 
-    } catch (error) {
-      console.error('Error creating VM:', error);
-      setLoading(false); // Set loading state to false after failed creation
-      navigate('/error', { message: error }); // Redirect to error page with message
-    }
   };
 
   const handleDiskChange = (index, event) => {
@@ -226,7 +282,7 @@ const CreateSingleVMForm = () => {
     <div className="create-single-vm-form">
       <h2>Create Single VM</h2>
       <form onSubmit={handleSubmit}>
-        <div className="form-group">
+        <div className={`form-group ${submitted && !formData.vmName && 'error'}`}>
           <label htmlFor="vmName">VM Name:</label>
           <input
             type="text"
@@ -234,18 +290,18 @@ const CreateSingleVMForm = () => {
             name="vmName"
             value={formData.vmName}
             onChange={handleChange}
-            className="form-input-small"
+            className={`form-input-small ${submitted && !formData.vmName && 'error'}`}
             required
           />
         </div>
-        <div className="form-group">
+        <div className={`form-group ${submitted && !formData.datacenterName && 'error'}`}>
           <label htmlFor="datacenterName">Datacenter Name:</label>
           <select
             id="datacenterName"
             name="datacenterName"
             value={formData.datacenterName}
             onChange={handleChange}
-            className="form-input-small"
+            className={`form-input-small ${submitted && !formData.datacenterName && 'error'}`}
             required
           >
             <option value="">Select Datacenter</option>
@@ -258,14 +314,14 @@ const CreateSingleVMForm = () => {
         </div>
 
         {/* Customer Folders */}
-        <div className="form-group">
+        <div className={`form-group ${submitted && !formData.customerFolder && 'error'}`}>
           <label htmlFor="customerFolder">Customer Folder:</label>
           <select
             id="customerFolder"
             name="customerFolder"
             value={formData.customerFolder}
             onChange={handleChange}
-            className="form-input-small"
+            className={`form-input-small ${submitted && !formData.customerFolder && 'error'}`}
             required
           >
             <option value="">Select Customer Folder</option>
@@ -278,14 +334,14 @@ const CreateSingleVMForm = () => {
         </div>
 
         {/* Cluster Name */}
-        <div className="form-group">
+        <div className={`form-group ${submitted && !formData.clusterName && 'error'}`}>
           <label htmlFor="clusterName">Cluster Name:</label>
           <select
             id="clusterName"
             name="clusterName"
             value={formData.clusterName}
             onChange={handleChange}
-            className="form-input-small"
+            className={`form-input-small ${submitted && !formData.clusterName && 'error'}`}
             required
           >
             <option value="">Select Cluster Name</option>
@@ -298,14 +354,14 @@ const CreateSingleVMForm = () => {
         </div>
 
         {/* Datastore Cluster Name */}
-        <div className="form-group">
+        <div className={`form-group ${submitted && !formData.datastoreClusterName && 'error'}`}>
           <label htmlFor="datastoreClusterName">Datastore Cluster Name:</label>
           <select
             id="datastoreClusterName"
             name="datastoreClusterName"
             value={formData.datastoreClusterName}
             onChange={handleChange}
-            className="form-input-small"
+            className={`form-input-small ${submitted && !formData.datastoreClusterName && 'error'}`}
             required
           >
             <option value="">Select Datastore Cluster Name</option>
@@ -317,14 +373,14 @@ const CreateSingleVMForm = () => {
           </select>
         </div>
 
-        <div className="form-group">
+        <div className={`form-group ${submitted && !formData.templateName && 'error'}`}>
             <label htmlFor="templateName">OS Template Name:</label>
             <select
                 id="templateName"
                 name="templateName"
                 value={formData.templateName}
                 onChange={handleChange}
-                className="form-input-small"
+                className={`form-input-small ${submitted && !formData.templateName && 'error'}`}
                 required
             >
                 <option value="">Select OS Template</option>
@@ -339,7 +395,7 @@ const CreateSingleVMForm = () => {
 
         <div className="form-group">
           <div className="cpu-group">
-            <div className="cpu-socket">
+            <div className={`form-group ${submitted && !formData.cpuSockets && 'error'}`}>
               <label htmlFor="cpuSockets">CPU Sockets:</label>
               <input
                 type="text"
@@ -347,11 +403,11 @@ const CreateSingleVMForm = () => {
                 name="cpuSockets"
                 value={formData.cpuSockets}
                 onChange={handleChange}
-                className="form-input-small"
+                className={`form-input-small ${submitted && !formData.cpuSockets && 'error'}`}
                 required
               />
             </div>
-            <div className="cores-per-socket">
+            <div className={`form-group ${submitted && !formData.coresPerSocket && 'error'}`}>
               <label htmlFor="coresPerSocket">Cores per Socket:</label>
               <input
                 type="text"
@@ -359,13 +415,13 @@ const CreateSingleVMForm = () => {
                 name="coresPerSocket"
                 value={formData.coresPerSocket}
                 onChange={handleChange}
-                className="form-input-small"
+                className={`form-input-small ${submitted && !formData.coresPerSocket && 'error'}`}
                 required
               />
             </div>
           </div>
         </div>
-        <div className="form-group">
+        <div className={`form-group ${submitted && !formData.memoryMb && 'error'}`}>
           <label htmlFor="memoryMb">Memory (MB):</label>
           <input
             type="text"
@@ -373,19 +429,19 @@ const CreateSingleVMForm = () => {
             name="memoryMb"
             value={formData.memoryMb}
             onChange={handleChange}
-            className="form-input-small"
+            className={`form-input-small ${submitted && !formData.memoryMb && 'error'}`}
             required
           />
         </div>
 
-        <div className="form-group">
+        <div className={`form-group ${submitted && !formData.networkPortGroups && 'error'}`}>
           <label htmlFor="networkPortGroup">Network Port Group:</label>
           {formData.networkPortGroups.map((networkPortGroup, index) => (
             <div key={index}>
               <select
                 value={networkPortGroup}
                 onChange={(event) => handleNetworkPortGroupChange(index, event)}
-                className="form-input-small"
+                className={`form-input-small ${submitted && !formData.networkPortGroups && 'error'}`}
                 required
               >
                 <option value="">Select Network Port Group</option>
@@ -464,6 +520,7 @@ const CreateSingleVMForm = () => {
         {loading ? 'Creating...' : 'Create VM'}
       </button>
       </form>
+      {error && <div className="error">{error}</div>} {/* Display error message */}
     </div>
   );
 };
